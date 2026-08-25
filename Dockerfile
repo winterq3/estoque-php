@@ -8,10 +8,12 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-RUN echo '<Directory /var/www/html/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' >> /ent/apache2/apache2.conf
+RUN { \
+        echo '<Directory /var/www/html/public>'; \
+        echo 'AllowOverride All'; \
+        echo 'Require all granted'; \
+        echo '</Directory>'; \
+} >> /etc/apache2/apache2.conf
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
