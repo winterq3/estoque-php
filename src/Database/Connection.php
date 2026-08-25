@@ -13,7 +13,9 @@ class Connection
     {
         if (self::$instance === null) {
             $config = require __DIR__ . '/../../config/database.php';
-            $dsn = "mysql:host={$config['host']};dbname={$config['dbname']};charset={$config['charset']}";
+
+            $porta = getenv('MYSQLPORT') ?: '3306';
+            $dsn = "mysql:host={$config['host']};port={$porta};dbname={$config['dbname']};charset={$config['charset']}";
 
             try {
                 self::$instance = new PDO(
