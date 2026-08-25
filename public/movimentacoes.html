@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movimentações · Almoxarifado</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#14181F', surface: '#1E2530', line: '#2E3644',
+          ink: '#E8EAED', muted: '#8B93A1', amber: '#E8A33D',
+          ok: '#4F9D69', crit: '#D64545',
+        },
+        fontFamily: {
+          display: ['Oswald', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #14181F; }
+  .nav-link { color: #8B93A1; transition: color .15s; }
+  .nav-link:hover, .nav-link.active { color: #E8EAED; }
+  .nav-link.active { border-bottom: 2px solid #E8A33D; }
+  ::selection { background: #E8A33D; color: #14181F; }
+  .btn-ghost { border: 1px solid #2E3644; color: #8B93A1; }
+  .btn-ghost:hover { color: #E8EAED; border-color: #8B93A1; }
+  input, select {
+    background: #1E2530; border: 1px solid #2E3644; color: #E8EAED;
+  }
+  input:focus, select:focus { outline: none; border-color: #E8A33D; }
+  .btn-primary { background: #E8A33D; color: #14181F; }
+  .btn-primary:hover { background: #f0b158; }
+  .tipo-toggle {
+    border: 1px solid #2E3644; color: #8B93A1;
+  }
+  .tipo-toggle.active-entrada { background: #4F9D69; color: #14181F; border-color: #4F9D69; }
+  .tipo-toggle.active-saida { background: #D64545; color: #14181F; border-color: #D64545; }
+</style>
+</head>
+<body class="font-body text-ink min-h-screen">
+  <script src="auth.js"></script>
+
+  <header class="border-b border-line">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 border-2 border-amber flex items-center justify-center font-mono text-amber text-xs font-semibold">#A</div>
+        <h1 class="font-display text-lg tracking-wide uppercase">Almoxarifado</h1>
+      </div>
+      <nav class="hidden sm:flex gap-6 text-sm font-medium pb-1">
+        <a href="dashboard.html" class="nav-link pb-1">Dashboard</a>
+        <a href="produtos.html" class="nav-link pb-1">Produtos</a>
+        <a href="movimentacoes.html" class="nav-link active pb-1">Movimentações</a>
+        <a href="fornecedores.html" class="nav-link pb-1">Fornecedores</a>
+        <a href="relatorios.html" class="nav-link pb-1">Relatórios</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <span id="usuario-logado" class="text-xs font-mono text-muted hidden sm:inline"></span>
+        <button onclick="fazerLogout()" class="btn-ghost text-xs font-mono px-3 py-1.5 rounded-sm">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Formulário de registro -->
+    <section class="lg:col-span-1">
+      <p class="text-xs font-mono text-muted uppercase tracking-widest mb-1">Novo lançamento</p>
+      <h2 class="font-display text-2xl uppercase tracking-wide mb-5">Registrar</h2>
+
+      <form id="form-mov" onsubmit="registrarMovimentacao(event)" class="space-y-4 border border-line p-5">
+        <div class="flex gap-2">
+          <button type="button" id="btn-entrada" onclick="setTipo('entrada')"
+            class="tipo-toggle active-entrada flex-1 text-sm font-medium py-2 rounded-sm">Entrada</button>
+          <button type="button" id="btn-saida" onclick="setTipo('saida')"
+            class="tipo-toggle flex-1 text-sm font-medium py-2 rounded-sm">Saída</button>
+        </div>
+        <input type="hidden" id="mov-tipo" value="entrada">
+
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Produto</label>
+          <select id="mov-produto" required class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Quantidade</label>
+          <input type="number" id="mov-quantidade" min="1" required class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+        </div>
+
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Responsável</label>
+          <input type="text" id="mov-responsavel" class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+        </div>
+
+        <p id="erro-mov" class="text-crit text-xs font-mono hidden"></p>
+
+        <button type="submit" class="btn-primary w-full font-medium text-sm py-2.5 rounded-sm">Registrar lançamento</button>
+      </form>
+    </section>
+
+    <!-- Histórico -->
+    <section class="lg:col-span-2">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <p class="text-xs font-mono text-muted uppercase tracking-widest mb-1">Registro</p>
+          <h2 class="font-display text-2xl uppercase tracking-wide">Histórico</h2>
+        </div>
+        <select id="filtro-produto" onchange="filtrarHistorico()" class="px-3 py-2 text-xs rounded-sm">
+          <option value="">Todos os produtos</option>
+        </select>
+      </div>
+
+      <div class="border border-line divide-y divide-line" id="lista-historico">
+        <p class="px-5 py-4 text-sm text-muted font-mono">Carregando...</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let produtosCache = [];
+    let historicoCache = [];
+
+    function setTipo(tipo) {
+      document.getElementById('mov-tipo').value = tipo;
+      document.getElementById('btn-entrada').classList.toggle('active-entrada', tipo === 'entrada');
+      document.getElementById('btn-saida').classList.toggle('active-saida', tipo === 'saida');
+    }
+
+    async function carregarProdutos() {
+      const res = await fetch('produtos');
+      produtosCache = await res.json();
+
+      const selectMov = document.getElementById('mov-produto');
+      const selectFiltro = document.getElementById('filtro-produto');
+
+      // Limpa as opções antigas antes de repopular (mantém só o placeholder "Selecione..." / "Todos os produtos")
+      selectMov.innerHTML = '<option value="">Selecione...</option>';
+      selectFiltro.innerHTML = '<option value="">Todos os produtos</option>';
+
+      produtosCache.forEach(p => {
+        const opt1 = document.createElement('option');
+        opt1.value = p.id;
+        opt1.textContent = `${p.nome} (saldo: ${p.saldo_atual} ${p.unidade_medida})`;
+        selectMov.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = p.id;
+        opt2.textContent = p.nome;
+        selectFiltro.appendChild(opt2);
+      });
+    }
+
+    async function carregarHistorico() {
+      const res = await fetch('movimentacoes');
+      historicoCache = await res.json();
+      renderHistorico(historicoCache);
+    }
+
+    function renderHistorico(itens) {
+      const container = document.getElementById('lista-historico');
+      if (!itens.length) {
+        container.innerHTML = `<p class="px-5 py-4 text-sm text-muted font-mono">Nenhuma movimentação registrada.</p>`;
+        return;
+      }
+      container.innerHTML = itens.map(m => {
+        const cor = m.tipo === 'entrada' ? 'text-ok' : 'text-crit';
+        const sinal = m.tipo === 'entrada' ? '+' : '−';
+        const data = new Date(m.data_movimentacao).toLocaleString('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        return `
+          <div class="px-5 py-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium">${m.produto_nome}</p>
+              <p class="text-xs text-muted font-mono">${data} · ${m.responsavel ?? 'sem responsável'}</p>
+            </div>
+            <p class="font-mono text-sm font-semibold ${cor}">${sinal} ${m.quantidade}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filtrarHistorico() {
+      const produtoId = document.getElementById('filtro-produto').value;
+      if (!produtoId) {
+        renderHistorico(historicoCache);
+        return;
+      }
+      renderHistorico(historicoCache.filter(m => m.produto_id == produtoId));
+    }
+
+    async function registrarMovimentacao(event) {
+      event.preventDefault();
+      const dados = {
+        produto_id: document.getElementById('mov-produto').value,
+        tipo: document.getElementById('mov-tipo').value,
+        quantidade: parseInt(document.getElementById('mov-quantidade').value),
+        responsavel: document.getElementById('mov-responsavel').value || null,
+      };
+
+      const res = await fetch('movimentacoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+      const resultado = await res.json();
+
+      const erroEl = document.getElementById('erro-mov');
+      if (!res.ok) {
+        erroEl.textContent = resultado.erro || 'Erro ao registrar movimentação';
+        erroEl.classList.remove('hidden');
+        return;
+      }
+      erroEl.classList.add('hidden');
+
+      document.getElementById('form-mov').reset();
+      setTipo('entrada');
+      await carregarProdutos();
+      await carregarHistorico();
+    }
+
+    carregarProdutos();
+    carregarHistorico();
+  </script>
+</body>
+</html>

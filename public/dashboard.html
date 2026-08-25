@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · Almoxarifado</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#14181F',
+          surface: '#1E2530',
+          line: '#2E3644',
+          ink: '#E8EAED',
+          muted: '#8B93A1',
+          amber: '#E8A33D',
+          ok: '#4F9D69',
+          crit: '#D64545',
+        },
+        fontFamily: {
+          display: ['Oswald', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #14181F; }
+  .tag-card {
+    position: relative;
+    border: 1px dashed #2E3644;
+    background: #1E2530;
+  }
+  .tag-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 16px;
+    width: 10px; height: 10px;
+    background: #14181F;
+    border: 1px dashed #2E3644;
+    border-radius: 50%;
+    transform: translateY(-50%);
+  }
+  .nav-link { color: #8B93A1; transition: color .15s; }
+  .nav-link:hover, .nav-link.active { color: #E8EAED; }
+  .nav-link.active { border-bottom: 2px solid #E8A33D; }
+  ::selection { background: #E8A33D; color: #14181F; }
+  .btn-ghost { border: 1px solid #2E3644; color: #8B93A1; }
+  .btn-ghost:hover { color: #E8EAED; border-color: #8B93A1; }
+</style>
+</head>
+<body class="font-body text-ink min-h-screen">
+  <script src="auth.js"></script>
+
+  <header class="border-b border-line">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 border-2 border-amber flex items-center justify-center font-mono text-amber text-xs font-semibold">#A</div>
+        <h1 class="font-display text-lg tracking-wide uppercase">Almoxarifado</h1>
+      </div>
+      <nav class="hidden sm:flex gap-6 text-sm font-medium pb-1">
+        <a href="dashboard.html" class="nav-link active pb-1">Dashboard</a>
+        <a href="produtos.html" class="nav-link pb-1">Produtos</a>
+        <a href="movimentacoes.html" class="nav-link pb-1">Movimentações</a>
+        <a href="fornecedores.html" class="nav-link pb-1">Fornecedores</a>
+        <a href="relatorios.html" class="nav-link pb-1">Relatórios</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <span id="usuario-logado" class="text-xs font-mono text-muted hidden sm:inline"></span>
+        <button onclick="fazerLogout()" class="btn-ghost text-xs font-mono px-3 py-1.5 rounded-sm">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex items-baseline justify-between mb-8">
+      <div>
+        <p class="text-xs font-mono text-muted uppercase tracking-widest mb-1">Ficha geral</p>
+        <h2 class="font-display text-3xl uppercase tracking-wide">Visão do estoque</h2>
+      </div>
+      <p class="text-xs font-mono text-muted" id="data-atual"></p>
+    </div>
+
+    <!-- Cards de estatística -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      <div class="tag-card px-5 py-4">
+        <p class="text-xs font-mono text-muted uppercase tracking-widest mb-2">Itens cadastrados</p>
+        <p class="font-mono text-3xl font-semibold" id="total-produtos">—</p>
+      </div>
+      <div class="tag-card px-5 py-4">
+        <p class="text-xs font-mono text-muted uppercase tracking-widest mb-2">Fornecedores</p>
+        <p class="font-mono text-3xl font-semibold" id="total-fornecedores">—</p>
+      </div>
+      <div class="tag-card px-5 py-4 border-crit">
+        <p class="text-xs font-mono text-crit uppercase tracking-widest mb-2">Estoque crítico</p>
+        <p class="font-mono text-3xl font-semibold text-crit" id="total-criticos">—</p>
+      </div>
+    </section>
+
+    <!-- Alerta de estoque baixo -->
+    <section class="mb-10">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 bg-amber rounded-full"></span>
+        <h3 class="font-display text-sm uppercase tracking-widest text-amber">Abaixo do mínimo</h3>
+      </div>
+      <div class="border border-line divide-y divide-line" id="lista-criticos">
+        <p class="px-5 py-4 text-sm text-muted font-mono">Carregando...</p>
+      </div>
+    </section>
+
+    <!-- Últimas movimentações -->
+    <section>
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 bg-muted rounded-full"></span>
+        <h3 class="font-display text-sm uppercase tracking-widest text-muted">Últimas movimentações</h3>
+      </div>
+      <div class="border border-line divide-y divide-line" id="lista-movimentacoes">
+        <p class="px-5 py-4 text-sm text-muted font-mono">Carregando...</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = '';
+
+    document.getElementById('data-atual').textContent = new Date().toLocaleDateString('pt-BR', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    }).toUpperCase();
+
+    async function carregarDashboard() {
+      try {
+        const [produtos, fornecedores, criticos, movimentacoes] = await Promise.all([
+          fetch('produtos').then(r => r.json()),
+          fetch('fornecedores').then(r => r.json()),
+          fetch('produtos/estoque-baixo').then(r => r.json()),
+          fetch('movimentacoes').then(r => r.json()),
+        ]);
+
+        document.getElementById('total-produtos').textContent = produtos.length;
+        document.getElementById('total-fornecedores').textContent = fornecedores.length;
+        document.getElementById('total-criticos').textContent = criticos.length;
+
+        renderCriticos(criticos);
+        renderMovimentacoes(movimentacoes.slice(0, 8));
+      } catch (err) {
+        console.error('Falha ao carregar dashboard:', err);
+      }
+    }
+
+    function renderCriticos(itens) {
+      const container = document.getElementById('lista-criticos');
+      if (!itens.length) {
+        container.innerHTML = `<p class="px-5 py-4 text-sm text-muted font-mono">Nenhum item abaixo do mínimo.</p>`;
+        return;
+      }
+      container.innerHTML = itens.map(p => `
+        <div class="px-5 py-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium">${p.nome}</p>
+            <p class="text-xs text-muted font-mono uppercase">${p.categoria ?? 'sem categoria'}</p>
+          </div>
+          <div class="text-right font-mono text-sm">
+            <span class="text-crit font-semibold">${p.saldo_atual}</span>
+            <span class="text-muted"> / mín. ${p.quantidade_minima} ${p.unidade_medida}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMovimentacoes(itens) {
+      const container = document.getElementById('lista-movimentacoes');
+      if (!itens.length) {
+        container.innerHTML = `<p class="px-5 py-4 text-sm text-muted font-mono">Nenhuma movimentação registrada.</p>`;
+        return;
+      }
+      container.innerHTML = itens.map(m => {
+        const cor = m.tipo === 'entrada' ? 'text-ok' : 'text-crit';
+        const sinal = m.tipo === 'entrada' ? '+' : '−';
+        const data = new Date(m.data_movimentacao).toLocaleDateString('pt-BR');
+        return `
+          <div class="px-5 py-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium">${m.produto_nome}</p>
+              <p class="text-xs text-muted font-mono">${data} · ${m.responsavel ?? 'sem responsável'}</p>
+            </div>
+            <p class="font-mono text-sm font-semibold ${cor}">${sinal} ${m.quantidade}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    carregarDashboard();
+  </script>
+</body>
+</html>

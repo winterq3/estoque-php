@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produtos · Almoxarifado</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#14181F', surface: '#1E2530', line: '#2E3644',
+          ink: '#E8EAED', muted: '#8B93A1', amber: '#E8A33D',
+          ok: '#4F9D69', crit: '#D64545',
+        },
+        fontFamily: {
+          display: ['Oswald', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #14181F; }
+  .nav-link { color: #8B93A1; transition: color .15s; }
+  .nav-link:hover, .nav-link.active { color: #E8EAED; }
+  .nav-link.active { border-bottom: 2px solid #E8A33D; }
+  ::selection { background: #E8A33D; color: #14181F; }
+  input, select {
+    background: #1E2530; border: 1px solid #2E3644; color: #E8EAED;
+  }
+  input:focus, select:focus {
+    outline: none; border-color: #E8A33D;
+  }
+  input::placeholder { color: #8B93A1; }
+  .btn-primary {
+    background: #E8A33D; color: #14181F;
+  }
+  .btn-primary:hover { background: #f0b158; }
+  .btn-ghost {
+    border: 1px solid #2E3644; color: #8B93A1;
+  }
+  .btn-ghost:hover { color: #E8EAED; border-color: #8B93A1; }
+  .modal-backdrop { background: rgba(20,24,31,0.8); }
+</style>
+</head>
+<body class="font-body text-ink min-h-screen">
+  <script src="auth.js"></script>
+
+  <header class="border-b border-line">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 border-2 border-amber flex items-center justify-center font-mono text-amber text-xs font-semibold">#A</div>
+        <h1 class="font-display text-lg tracking-wide uppercase">Almoxarifado</h1>
+      </div>
+      <nav class="hidden sm:flex gap-6 text-sm font-medium pb-1">
+        <a href="dashboard.html" class="nav-link pb-1">Dashboard</a>
+        <a href="produtos.html" class="nav-link active pb-1">Produtos</a>
+        <a href="movimentacoes.html" class="nav-link pb-1">Movimentações</a>
+        <a href="fornecedores.html" class="nav-link pb-1">Fornecedores</a>
+        <a href="relatorios.html" class="nav-link pb-1">Relatórios</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <span id="usuario-logado" class="text-xs font-mono text-muted hidden sm:inline"></span>
+        <button onclick="fazerLogout()" class="btn-ghost text-xs font-mono px-3 py-1.5 rounded-sm">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div>
+        <p class="text-xs font-mono text-muted uppercase tracking-widest mb-1">Catálogo</p>
+        <h2 class="font-display text-3xl uppercase tracking-wide">Produtos</h2>
+      </div>
+      <button onclick="abrirModal()" class="btn-primary font-medium text-sm px-5 py-2.5 rounded-sm">
+        + Cadastrar produto
+      </button>
+    </div>
+
+    <div class="mb-6">
+      <input type="text" id="busca" placeholder="Buscar por nome ou categoria..."
+        class="w-full sm:w-80 px-4 py-2.5 text-sm rounded-sm" oninput="filtrar()">
+    </div>
+
+    <div class="border border-line overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-line text-left text-xs font-mono text-muted uppercase tracking-widest">
+            <th class="px-5 py-3 font-medium">Produto</th>
+            <th class="px-5 py-3 font-medium">Categoria</th>
+            <th class="px-5 py-3 font-medium">Fornecedor</th>
+            <th class="px-5 py-3 font-medium text-right">Saldo</th>
+            <th class="px-5 py-3 font-medium text-right">Mínimo</th>
+            <th class="px-5 py-3 font-medium text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-produtos" class="divide-y divide-line">
+          <tr><td colspan="6" class="px-5 py-6 text-center text-muted font-mono text-sm">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal de cadastro/edição -->
+  <div id="modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center px-4 z-50">
+    <div class="bg-surface border border-line w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-display text-lg uppercase tracking-wide" id="modal-titulo">Cadastrar produto</h3>
+        <button onclick="fecharModal()" class="text-muted hover:text-ink text-xl leading-none">&times;</button>
+      </div>
+      <form id="form-produto" class="space-y-4" onsubmit="salvarProduto(event)">
+        <input type="hidden" id="produto-id">
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Nome</label>
+          <input type="text" id="produto-nome" required class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+        </div>
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Categoria</label>
+          <input type="text" id="produto-categoria" class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-mono text-muted uppercase tracking-widest">Unidade</label>
+            <input type="text" id="produto-unidade" required placeholder="un, kg, m..." class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+          </div>
+          <div>
+            <label class="text-xs font-mono text-muted uppercase tracking-widest">Qtd. mínima</label>
+            <input type="number" id="produto-minima" min="0" value="0" class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-mono text-muted uppercase tracking-widest">Fornecedor</label>
+          <select id="produto-fornecedor" class="w-full mt-1 px-3 py-2 text-sm rounded-sm">
+            <option value="">Nenhum</option>
+          </select>
+        </div>
+        <p id="erro-produto" class="text-crit text-xs font-mono hidden"></p>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="btn-primary flex-1 font-medium text-sm py-2.5 rounded-sm">Salvar</button>
+          <button type="button" onclick="fecharModal()" class="btn-ghost flex-1 font-medium text-sm py-2.5 rounded-sm">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let produtos = [];
+
+    async function carregarProdutos() {
+      const res = await fetch('produtos');
+      produtos = await res.json();
+      renderTabela(produtos);
+    }
+
+    async function carregarFornecedoresSelect() {
+      const res = await fetch('fornecedores');
+      const fornecedores = await res.json();
+      const select = document.getElementById('produto-fornecedor');
+      fornecedores.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = f.nome;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderTabela(lista) {
+      const tbody = document.getElementById('tabela-produtos');
+      if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-muted font-mono text-sm">Nenhum produto encontrado.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = lista.map(p => {
+        const critico = p.saldo_atual < p.quantidade_minima;
+        return `
+          <tr class="hover:bg-surface/50">
+            <td class="px-5 py-3.5 font-medium"><a href="produto-detalhe.html?id=${p.id}" class="hover:text-amber">${p.nome}</a></td>
+            <td class="px-5 py-3.5 text-muted text-xs uppercase font-mono">${p.categoria ?? '—'}</td>
+            <td class="px-5 py-3.5 text-muted text-xs">${p.fornecedor_nome ?? '—'}</td>
+            <td class="px-5 py-3.5 text-right font-mono ${critico ? 'text-crit font-semibold' : ''}">${p.saldo_atual} ${p.unidade_medida}</td>
+            <td class="px-5 py-3.5 text-right font-mono text-muted">${p.quantidade_minima}</td>
+            <td class="px-5 py-3.5 text-right">
+              <button onclick="editarProduto(${p.id})" class="text-xs font-mono text-muted hover:text-amber mr-3">editar</button>
+              <button onclick="excluirProduto(${p.id})" class="text-xs font-mono text-muted hover:text-crit">excluir</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filtrar() {
+      const termo = document.getElementById('busca').value.toLowerCase();
+      const filtrados = produtos.filter(p =>
+        p.nome.toLowerCase().includes(termo) ||
+        (p.categoria ?? '').toLowerCase().includes(termo)
+      );
+      renderTabela(filtrados);
+    }
+
+    function abrirModal() {
+      document.getElementById('modal-titulo').textContent = 'Cadastrar produto';
+      document.getElementById('form-produto').reset();
+      document.getElementById('produto-id').value = '';
+      document.getElementById('erro-produto').classList.add('hidden');
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
+    }
+
+    function editarProduto(id) {
+      const p = produtos.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('modal-titulo').textContent = 'Editar produto';
+      document.getElementById('produto-id').value = p.id;
+      document.getElementById('produto-nome').value = p.nome;
+      document.getElementById('produto-categoria').value = p.categoria ?? '';
+      document.getElementById('produto-unidade').value = p.unidade_medida;
+      document.getElementById('produto-minima').value = p.quantidade_minima;
+      document.getElementById('produto-fornecedor').value = p.fornecedor_id ?? '';
+      document.getElementById('erro-produto').classList.add('hidden');
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    async function salvarProduto(event) {
+      event.preventDefault();
+      const id = document.getElementById('produto-id').value;
+      const dados = {
+        nome: document.getElementById('produto-nome').value,
+        categoria: document.getElementById('produto-categoria').value || null,
+        unidade_medida: document.getElementById('produto-unidade').value,
+        quantidade_minima: parseInt(document.getElementById('produto-minima').value) || 0,
+        fornecedor_id: document.getElementById('produto-fornecedor').value || null,
+      };
+
+      const url = id ? `produtos/${id}` : 'produtos';
+      const method = id ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+      const resultado = await res.json();
+
+      if (!res.ok) {
+        const erroEl = document.getElementById('erro-produto');
+        erroEl.textContent = resultado.erro || 'Erro ao salvar produto';
+        erroEl.classList.remove('hidden');
+        return;
+      }
+
+      fecharModal();
+      carregarProdutos();
+    }
+
+    async function excluirProduto(id) {
+      if (!confirm('Remover este produto?')) return;
+      const res = await fetch(`produtos/${id}`, { method: 'DELETE' });
+      const resultado = await res.json();
+      if (!res.ok) {
+        alert(resultado.erro || 'Erro ao excluir produto');
+        return;
+      }
+      carregarProdutos();
+    }
+
+    carregarProdutos();
+    carregarFornecedoresSelect();
+  </script>
+</body>
+</html>
