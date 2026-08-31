@@ -1,5 +1,7 @@
 FROM php:8.2-apache
 
+RUN a2dismod mpm_event 2>/dev/null || true
+RUN a2enmod mpm_prefork
 RUN a2enmod rewrite
 
 RUN docker-php-ext-install pdo pdo_mysql
