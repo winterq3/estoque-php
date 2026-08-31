@@ -5,6 +5,7 @@ RUN rm -f /etc/apache2/mods-enabled/mpm_worker.conf /etc/apache2/mods-enabled/mp
 RUN rm -f /etc/apache2/mods-enabled/mpm_itk.conf /etc/apache2/mods-enabled/mpm_itk.load
 RUN a2enmod mpm_prefork
 RUN a2enmod rewrite
+RUN ls -la /etc/apache2/mods-enabled/ | grep -i mpm
 
 RUN docker-php-ext-install pdo pdo_mysql
 
