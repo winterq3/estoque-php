@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS produtos (
     unidade_medida VARCHAR(20) NOT NULL,
     quantidade_minima INT NOT NULL DEFAULT 0,
     fornecedor_id INT,
-    FOREIGN KEY (fornecedor_id) REFERENES fornecedores(id)
+    FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(id)
 );
 
 CREATE TABLE IF NOT EXISTS movimentacoes (
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS movimentacoes (
     quantidade INT NOT NULL,
     data_movimentacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     responsavel VARCHAR(150),
-    FOREIGN KEY (produto_id) REFERENES produtos(id)
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (
