@@ -67,25 +67,34 @@ O saldo de cada produto nunca é armazenado diretamente - é sempre recalculado 
 ## Capturas de tela
 
 **Login**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/2a02771e-016f-4d75-a773-1d3bfb53ebe8" />
+
+**Cadastro**
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/88044821-376f-4674-9c07-7df9f12a2013" />
 
 **Dashboard**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/160caf85-abbb-4b5c-b7f9-af0209c43f9d" />
 
 **Página de produtos**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/479c219a-485a-4da7-8ab2-cd35fa00f2fe" />
+
+**Cadastro de produto**
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/7a328ee9-9b0f-4974-9669-8eae12837857" />
 
 **Detalhes do produto**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/285fdd51-95d4-454a-9954-cda34b6f16c7" />
 
 **Página de movimentações**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/cfc67808-bbc5-4c0b-94b7-7a9b04d9630b" />
 
 **Página de fornecedores**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/aa8f979e-3d0a-4c70-9908-5ae2213e931d" />
+
+**Cadastro de fornecedores**
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/d539adbf-eb4c-48ef-9f92-a9b21ba84c7e" />
 
 **Página de relatórios**
-[em breve]
+<img width="1599" height="899" alt="Image" src="https://github.com/user-attachments/assets/7b0b056b-c455-4352-8e42-332ac2736631" />
 
 ## Autor
 
