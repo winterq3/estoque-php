@@ -2,7 +2,7 @@
 
 Sistema web de controle de estoque e inventário, desenvolvido em PHP puro, com cadastro de produtos, fornecedores e controle de movimentações de entrada e saída.
 
-Acesse o projeto no ar: [em breve]
+Acesse o projeto no ar: [estoque-php-production.up.railway.app](https://estoque-php-production.up.railway.app/login.html)
 
 ## Sobre o projeto
 Este sistema foi desenvolvido como projeto de portfólio, aplicando na prática os principais conceitos de desenvolvimento web sem depender de um framework: modelagem de banco de dados relacional, CRUD completo, autenticação de usuários, testes automatizados e deploy em produção.
@@ -18,12 +18,13 @@ Este sistema foi desenvolvido como projeto de portfólio, aplicando na prática 
 
 ## Tecnologias utilizadas
 - PHP 8.2 (orientado a objetos, sem framework)
-- MySQL/MariaDB (banco de dados)
+- MySQL (banco de dados)
 - PDO com prepared statements (acesso ao banco)
 - Tailwind CSS (estilização)
 - JavaScript (Fetch API)
 - PHPUnit (testes automatizados)
-- XAMPP (ambiente local)
+- Docker (containerização)
+- XAMPP (deploy)
 
 ## Como rodar o projeto localmente
 ## Pré-requisitos
